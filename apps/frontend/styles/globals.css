@@ -1,0 +1,102 @@
+﻿:root{
+  --bg:#0b0b0f;
+  --panel:#12141a;
+  --panel-2:#171922;
+  --text:#e9eaf2;
+  --muted:#a8adc0;
+  --border:#232636;
+  --primary:#3b82f6;
+  --primary-2:#2563eb;
+  --chip:#202437;
+  --shadow: 0 8px 30px rgba(0,0,0,.35);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body{
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, Apple Color Emoji, Segoe UI Emoji;
+
+  /* Make the page a column so <main> can flex and fill the viewport */
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+}
+
+/* Header (optional) */
+.header{
+  height: 60px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(0deg, var(--panel), var(--panel-2));
+}
+.brand{ font-weight: 700; letter-spacing: .3px; }
+
+/* ---- PAGE CONTAINER ----
+   .shell is your main container.
+   .fill makes it stretch to the remaining screen height. */
+.shell{
+  /* To truly use the whole width, remove the max-width.
+     If you prefer a contained look, set a number like 1200px. */
+  max-width: none;          /* or 1200px */
+  width: 100%;
+  margin: 0;                /* remove big outer margins */
+  padding: 24px;            /* inner breathing room */
+}
+.fill{
+  /* Fill the viewport. If you keep a 60px header, subtract it. */
+  min-height: calc(100dvh - 60px);
+}
+
+/* Cards */
+.card{
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+/* HERO: two columns that fill height */
+.hero{
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1.1fr .9fr;
+
+  /* Make the hero as tall as the container allows */
+  min-height: 100%;
+  align-content: start;
+}
+@media (max-width: 900px){
+  .hero{ grid-template-columns: 1fr; }
+}
+
+.kicker{ color: var(--muted); font-size: 13px; letter-spacing:.12em; text-transform: uppercase; }
+.title{ font-size: 40px; line-height: 1.05; margin: 6px 0 10px; font-weight: 800; }
+.sub{ color: var(--muted); margin: 0 0 10px; max-width: 52ch; }
+
+/* chips + buttons */
+.row{ display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.chip{
+  background: var(--chip); color:#cbd5ff; border:1px solid var(--border);
+  padding: 6px 10px; border-radius: 999px; font-size: 12px;
+}
+
+.btn{
+  appearance: none; cursor: pointer;
+  padding: 10px 16px; border-radius: 12px; border: 1px solid var(--border);
+  background: #161925; color: var(--text); font-weight: 600;
+}
+.btn.primary{ background: var(--primary); border-color: transparent; }
+.btn.primary:hover{ background: var(--primary-2); }
+.btn:disabled{ opacity:.6; cursor: not-allowed; }
+
+/* problem preview box */
+.preview{
+  border: 1px solid var(--border); border-radius: 14px; padding: 14px;
+  background: #0f121a;
+}
+.preview .meta{ color: var(--muted); font-size: 12px; }
+.preview .prompt{ margin-top: 6px; font-size: 16px; }

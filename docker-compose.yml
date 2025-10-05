@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: matharena-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: matharena
+    ports:
+      - "5432:5432"        # if 5432 conflicts locally, change left side (e.g., 55432:5432)
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d matharena"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: ./apps/backend
+    working_dir: /app
+    container_name: matharena-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://app:app@db:5432/matharena  # IMPORTANT: host is 'db'
+      API_PORT: "8080"
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_fake}
+      PRICE_ID_1: ${PRICE_ID_1:-price_fake_1}
+      PRICE_ID_5: ${PRICE_ID_5:-price_fake_5}
+      PRICE_ID_100: ${PRICE_ID_100:-price_fake_100}
+      CORS_ORIGIN: http://localhost:3000
+    command: sh -c "npx prisma migrate deploy && npm run dev"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./apps/backend/src:/app/src
+      - ./apps/backend/shared:/app/shared
+      - ./apps/backend/prisma:/app/prisma
+
+  web:
+    build:
+      context: ./apps/frontend
+    working_dir: /app
+    container_name: matharena-frontend
+    depends_on:
+      - api
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8080   # what the browser calls
+      NODE_ENV: development
+    command: npm run dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/frontend:/app
+
+volumes:
+  pgdata:

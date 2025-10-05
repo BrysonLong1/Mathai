@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String              @id @default(cuid())
+  email            String              @unique
+  passwordHash     String
+  emailVerified    Boolean             @default(false)
+  stripeCustomerId String?
+  verifications    EmailVerification[]
+  players          MatchPlayer[]
+  submissions      Submission[]
+}
+
+model EmailVerification {
+  id        String   @id @default(cuid())
+  userId    String
+  codeHash  String
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Problem {
+  id           String      @id @default(cuid())
+  prompt       String
+  type         ProblemType
+  answer       String
+  tolerance    Float?
+  aliases      Json
+  codeTemplate String?
+  matches      Match[]
+}
+
+model Match {
+  id                 String        @id @default(cuid())
+  state              MatchState
+  entryFee           Int
+  lobbyDeadline      DateTime
+  createdAt          DateTime      @default(now())
+  startedAt          DateTime?
+  endedAt            DateTime?
+  problemId          String
+  winnerSubmissionId String?       @unique
+  problem            Problem       @relation(fields: [problemId], references: [id])
+  winnerSubmission   Submission?   @relation("Winner", fields: [winnerSubmissionId], references: [id])
+  players            MatchPlayer[]
+  submissions        Submission[]
+
+  @@index([state, lobbyDeadline])
+}
+
+model MatchPlayer {
+  id                    String  @id @default(cuid())
+  matchId               String
+  userId                String
+  stripePaymentIntentId String
+  paymentCaptured       Boolean @default(false)
+  match                 Match   @relation(fields: [matchId], references: [id])
+  user                  User    @relation(fields: [userId], references: [id])
+}
+
+model Submission {
+  id         String  @id @default(cuid())
+  code       String
+  correct    Boolean
+  durationMs Int
+  matchId    String
+  userId     String?
+  winnerOf   Match?  @relation("Winner")
+  match      Match   @relation(fields: [matchId], references: [id])
+  user       User?   @relation(fields: [userId], references: [id])
+}
+
+enum ProblemType {
+  NUMERIC
+  STRING
+}
+
+enum MatchState {
+  LOBBY
+  ACTIVE
+  ENDED
+  CANCELLED
+}
